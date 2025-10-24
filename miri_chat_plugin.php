@@ -3,7 +3,7 @@
  * Plugin Name: Miri Chat Widget Pro
  * Plugin URI: https://intermedia.co.il
  * Description: וידג'ט צ'אט מתקדם עם AI - גרסה מסחרית עם התאמה אישית מלאה
- * Version: 2.0.0
+ * Version: 2.0.9
  * Author: Intermedia
  * Author URI: https://intermedia.co.il
  * Text Domain: miri-chat-pro
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 class Miri_Chat_Widget_Pro {
     
     private $option_name = 'miri_chat_pro_settings';
-    private $version = '2.0.0';
+    private $version = '2.0.9';
     
     public function __construct() {
         add_action('admin_menu', array($this, 'add_settings_page'));
