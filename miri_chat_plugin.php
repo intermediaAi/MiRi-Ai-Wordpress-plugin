@@ -35,7 +35,7 @@ class Miri_Chat_Widget_Pro {
         return array(
             // Basic
             'enabled' => true,
-            'webhook_url' => 'https://bot.intermedia.co.il/webhook/dc518a4b-4656-440b-90e4-3b583c90ef5c/chat',
+            'webhook_url' => '',
             
             // Appearance
             'title' => 'שלום! אני מירי 🤖',
