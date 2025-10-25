@@ -3,7 +3,7 @@
  * Plugin Name: Miri Chat Widget Pro
  * Plugin URI: https://intermedia.co.il
  * Description: וידג'ט צ'אט מתקדם עם AI - גרסה מסחרית עם התאמה אישית מלאה
- * Version: 2.0.9
+ * Version: 2.1.1
  * Author: Intermedia
  * Author URI: https://intermedia.co.il
  * Text Domain: miri-chat-pro
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 class Miri_Chat_Widget_Pro {
     
     private $option_name = 'miri_chat_pro_settings';
-    private $version = '2.0.9';
+    private $version = '2.1.1';
     
     public function __construct() {
         add_action('admin_menu', array($this, 'add_settings_page'));
@@ -35,7 +35,7 @@ class Miri_Chat_Widget_Pro {
         return array(
             // Basic
             'enabled' => true,
-            'webhook_url' => '',
+            'webhook_url' => 'https://bot.intermedia.co.il/webhook/dc518a4b-4656-440b-90e4-3b583c90ef5c/chat',
             
             // Appearance
             'title' => 'שלום! אני מירי 🤖',
@@ -45,7 +45,8 @@ class Miri_Chat_Widget_Pro {
             'placeholder' => 'כתוב/כתבי הודעה...',
             'button_text' => 'שלח',
             
-            // Colors
+            // Skin & Colors
+            'skin' => 'cosmic',
             'color_primary' => '#7C3AED',
             'color_secondary' => '#06B6D4',
             'color_bg' => '#0B1220',
@@ -195,6 +196,61 @@ class Miri_Chat_Widget_Pro {
                             <h2>🎨 עיצוב וצבעים</h2>
                             
                             <table class="form-table">
+                                <tr>
+                                    <th>בחר סקין</th>
+                                    <td>
+                                        <div class="skin-selector">
+                                            <label class="skin-option <?php echo $settings['skin'] === 'cosmic' ? 'active' : ''; ?>">
+                                                <input type="radio" name="<?php echo $this->option_name; ?>[skin]" value="cosmic" <?php checked($settings['skin'], 'cosmic'); ?>>
+                                                <div class="skin-preview cosmic-preview">
+                                                    <div class="preview-header"></div>
+                                                    <div class="preview-msg bot"></div>
+                                                    <div class="preview-msg user"></div>
+                                                </div>
+                                                <span class="skin-name">✨ Cosmic</span>
+                                                <p class="skin-desc">כהה, פוטוריסטי עם גרדיאנטים</p>
+                                            </label>
+                                            
+                                            <label class="skin-option <?php echo $settings['skin'] === 'whatsapp' ? 'active' : ''; ?>">
+                                                <input type="radio" name="<?php echo $this->option_name; ?>[skin]" value="whatsapp" <?php checked($settings['skin'], 'whatsapp'); ?>>
+                                                <div class="skin-preview whatsapp-preview">
+                                                    <div class="preview-header"></div>
+                                                    <div class="preview-msg bot"></div>
+                                                    <div class="preview-msg user"></div>
+                                                </div>
+                                                <span class="skin-name">💚 WhatsApp</span>
+                                                <p class="skin-desc">ירוק, נקי ומוכר לכולם</p>
+                                            </label>
+                                            
+                                            <label class="skin-option <?php echo $settings['skin'] === 'light' ? 'active' : ''; ?>">
+                                                <input type="radio" name="<?php echo $this->option_name; ?>[skin]" value="light" <?php checked($settings['skin'], 'light'); ?>>
+                                                <div class="skin-preview light-preview">
+                                                    <div class="preview-header"></div>
+                                                    <div class="preview-msg bot"></div>
+                                                    <div class="preview-msg user"></div>
+                                                </div>
+                                                <span class="skin-name">🤍 Modern Light</span>
+                                                <p class="skin-desc">לבן, מינימליסטי ועסקי</p>
+                                            </label>
+                                            
+                                            <label class="skin-option <?php echo $settings['skin'] === 'business' ? 'active' : ''; ?>">
+                                                <input type="radio" name="<?php echo $this->option_name; ?>[skin]" value="business" <?php checked($settings['skin'], 'business'); ?>>
+                                                <div class="skin-preview business-preview">
+                                                    <div class="preview-header"></div>
+                                                    <div class="preview-msg bot"></div>
+                                                    <div class="preview-msg user"></div>
+                                                </div>
+                                                <span class="skin-name">💼 Business</span>
+                                                <p class="skin-desc">כחול, רציני ומקצועי</p>
+                                            </label>
+                                        </div>
+                                        <p class="description" style="margin-top:1rem;">בחר את הסקין שמתאים לעיצוב האתר שלך</p>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="color-settings" style="<?php echo in_array($settings['skin'], ['cosmic', 'business']) ? '' : 'display:none;'; ?>">
+                                    <th colspan="2"><hr style="margin:2rem 0;"><h3 style="margin-bottom:1rem;">התאמת צבעים מתקדמת</h3></th>
+                                </tr>
                                 <tr>
                                     <th>צבע ראשי</th>
                                     <td>
@@ -569,6 +625,177 @@ class Miri_Chat_Widget_Pro {
         .miri-save-section .button-primary:hover {
             background: linear-gradient(135deg, #6D2ED5 0%, #0596B5 100%);
         }
+        
+        /* Skin Selector */
+        .skin-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .skin-option {
+            cursor: pointer;
+            border: 3px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.3s;
+            position: relative;
+            display: block;
+            background: white;
+        }
+        
+        .skin-option:hover {
+            border-color: #7C3AED;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(124,58,237,0.2);
+        }
+        
+        .skin-option.active {
+            border-color: #7C3AED;
+            background: linear-gradient(135deg, rgba(124,58,237,0.05), rgba(59,130,246,0.05));
+            box-shadow: 0 4px 12px rgba(124,58,237,0.15);
+        }
+        
+        .skin-option.active::after {
+            content: '✓';
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #7C3AED;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .skin-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+        
+        .skin-preview {
+            width: 100%;
+            height: 140px;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .preview-header {
+            height: 40px;
+            width: 100%;
+        }
+        
+        .preview-msg {
+            height: 30px;
+            margin: 8px 12px;
+            border-radius: 12px;
+            width: 70%;
+        }
+        
+        .preview-msg.user {
+            margin-right: auto;
+            margin-left: 12px;
+        }
+        
+        .preview-msg.bot {
+            margin-left: auto;
+            margin-right: 12px;
+        }
+        
+        /* Cosmic Preview */
+        .cosmic-preview {
+            background: linear-gradient(180deg, #0B1220 0%, #1a2332 100%);
+        }
+        
+        .cosmic-preview .preview-header {
+            background: linear-gradient(135deg, #7C3AED, #06B6D4);
+        }
+        
+        .cosmic-preview .preview-msg.bot {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .cosmic-preview .preview-msg.user {
+            background: #ffffff;
+        }
+        
+        /* WhatsApp Preview */
+        .whatsapp-preview {
+            background: #e5ddd5;
+        }
+        
+        .whatsapp-preview .preview-header {
+            background: #075e54;
+        }
+        
+        .whatsapp-preview .preview-msg.bot {
+            background: #ffffff;
+        }
+        
+        .whatsapp-preview .preview-msg.user {
+            background: #dcf8c6;
+        }
+        
+        /* Light Preview */
+        .light-preview {
+            background: #f9fafb;
+        }
+        
+        .light-preview .preview-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .light-preview .preview-msg.bot {
+            background: #f3f4f6;
+        }
+        
+        .light-preview .preview-msg.user {
+            background: #3b82f6;
+        }
+        
+        /* Business Preview */
+        .business-preview {
+            background: #f8fafc;
+        }
+        
+        .business-preview .preview-header {
+            background: #1e40af;
+        }
+        
+        .business-preview .preview-msg.bot {
+            background: #e0e7ff;
+        }
+        
+        .business-preview .preview-msg.user {
+            background: #3b82f6;
+        }
+        
+        .skin-name {
+            display: block;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            color: #1f2937;
+        }
+        
+        .skin-desc {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin: 0;
+        }
         </style>
         
         <script>
@@ -640,6 +867,112 @@ class Miri_Chat_Widget_Pro {
         })(jQuery);
         </script>
         <?php
+    }
+    
+    /**
+     * Get skin CSS
+     */
+    private function get_skin_css($settings) {
+        $skin = $settings['skin'];
+        
+        switch ($skin) {
+            case 'whatsapp':
+                return "
+:root{
+  --primary:#075e54;
+  --primary-light:#128c7e;
+  --bg:#e5ddd5;
+  --msg-bot:#ffffff;
+  --msg-user:#dcf8c6;
+  --text:#000000;
+  --text-light:#667781;
+  --border:#d1d7db;
+}
+.miri-launcher{background:var(--primary-light)!important}
+.miri-wrap{font-family:system-ui,-apple-system,sans-serif}
+.miri-card{background:#e5ddd5!important;background-image:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDBoNDAwdjQwMEgweiIgZmlsbD0iI0U1RERENSIvPjwvZz48L3N2Zz4=')!important;backdrop-filter:none!important;opacity:1!important}
+.miri-header{background:var(--primary)!important;border-bottom:none!important;padding:10px 14px 8px!important;gap:10px!important}
+.miri-hgroup{padding-left:8px!important;padding-right:0!important}
+.miri-avatar{margin-left:4px!important}
+.miri-feed{background:#e5ddd5!important}
+.msg .bubble{box-shadow:0 1px 0.5px rgba(0,0,0,.13)!important}
+.msg.me .bubble{background:var(--msg-user)!important;color:#000!important}
+.msg:not(.me) .bubble{background:var(--msg-bot)!important;color:#000!important;border:none!important}
+canvas#miri-net,
+.miri-bubble{display:none!important}
+.miri-input{background:#f0f2f5!important;border-top:none!important}
+.miri-text{background:#ffffff!important;color:#000!important;border-color:#d1d7db!important}
+.miri-send{background:var(--primary-light)!important}
+";
+            
+            case 'light':
+                return "
+:root{
+  --primary:#3b82f6;
+  --bg:#ffffff;
+  --bg-secondary:#f9fafb;
+  --msg-bot:#f3f4f6;
+  --msg-user:#3b82f6;
+  --text:#111827;
+  --text-light:#6b7280;
+  --border:#e5e7eb;
+}
+.miri-launcher{background:var(--primary)!important;border-radius:50%!important;box-shadow:0 4px 12px rgba(59,130,246,0.3)!important}
+.miri-card{background:rgba(255,255,255,0.98)!important;border:1px solid var(--border)!important;backdrop-filter:blur(20px)!important}
+.miri-header{background:#ffffff!important;border-bottom:1px solid var(--border)!important;color:var(--text)!important;text-shadow:none!important;padding:10px 14px 8px!important;gap:10px!important}
+.miri-hgroup{padding-left:8px!important;padding-right:0!important}
+.miri-avatar{margin-left:4px!important}
+.miri-title{color:var(--text)!important}
+.miri-sub{color:var(--text-light)!important}
+.miri-online{background:#10b981!important}
+.miri-feed{background:var(--bg-secondary)!important}
+.msg.me .bubble{background:var(--msg-user)!important;color:#ffffff!important;border:none!important}
+.msg:not(.me) .bubble{background:var(--msg-bot)!important;color:var(--text)!important;border:1px solid var(--border)!important}
+canvas#miri-net,
+.miri-bubble,
+.miri-shimmer{display:none!important}
+.miri-input{background:#ffffff!important;border-top:1px solid var(--border)!important}
+.miri-text{background:var(--bg-secondary)!important;color:var(--text)!important;border-color:var(--border)!important}
+.miri-text::placeholder{color:var(--text-light)!important}
+.miri-send{background:var(--primary)!important}
+.ts{color:var(--text-light)!important}
+";
+            
+            case 'business':
+                return "
+:root{
+  --primary:#1e40af;
+  --primary-light:#3b82f6;
+  --bg:#f8fafc;
+  --msg-bot:#e0e7ff;
+  --msg-user:#3b82f6;
+  --text:#1e293b;
+  --text-light:#64748b;
+  --border:#cbd5e1;
+}
+.miri-launcher{background:linear-gradient(135deg,var(--primary),var(--primary-light))!important}
+.miri-card{background:rgba(255,255,255,0.98)!important;border:1px solid var(--border)!important;backdrop-filter:blur(20px)!important}
+.miri-header{background:var(--primary)!important;border-bottom:1px solid rgba(255,255,255,0.1)!important;padding:10px 14px 8px!important;gap:10px!important}
+.miri-hgroup{padding-left:8px!important;padding-right:0!important}
+.miri-avatar{margin-left:4px!important}
+.miri-feed{background:var(--bg)!important}
+.msg.me .bubble{background:var(--msg-user)!important;color:#ffffff!important;border:none!important}
+.msg:not(.me) .bubble{background:var(--msg-bot)!important;color:var(--text)!important;border:none!important}
+canvas#miri-net,
+.miri-bubble{display:none!important}
+.miri-input{background:#ffffff!important;border-top:1px solid var(--border)!important}
+.miri-text{background:var(--bg)!important;color:var(--text)!important;border-color:var(--border)!important}
+.miri-text::placeholder{color:var(--text-light)!important}
+.miri-send{background:var(--primary)!important}
+";
+            
+            case 'cosmic':
+            default:
+                return "
+/* Cosmic skin - הטקסט צריך להיות לא צמוד */
+.miri-hgroup{padding-left:8px!important;padding-right:8px!important}
+"; // Default cosmic skin (original)
+        }
     }
     
     /**
@@ -724,6 +1057,7 @@ class Miri_Chat_Widget_Pro {
   --radius:20px;
 }
 *{box-sizing:border-box}
+*{box-sizing:border-box}
 
 .miri-launcher{position:fixed;<?php echo $position_css; ?>z-index:9999;background:linear-gradient(135deg,var(--accent),var(--accent-2));border:none;width:<?php echo $button_size; ?>px;height:<?php echo $button_size; ?>px;border-radius:20px;color:#fff;box-shadow:var(--shadow);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s ease;outline:none}
 .miri-launcher:hover{transform:translateY(-2px)}
@@ -741,10 +1075,10 @@ canvas#miri-net{position:absolute;inset:0;width:100%;height:100%;filter:contrast
 .miri-bubble:nth-child(3){width:120px;height:120px;right:35%;bottom:10%;animation-duration:16s}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 
-.miri-card{position:relative;display:flex;flex-direction:column;height:100%;max-height:80vh;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:rgba(10,14,30,.78) padding-box;border:1px solid var(--glass-border)}
+.miri-card{position:relative;display:flex;flex-direction:column;height:100%;max-height:80vh;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:rgba(10,14,30,.95) padding-box;border:1px solid var(--glass-border);backdrop-filter:blur(20px)}
 
-.miri-header{position:relative;padding:14px 16px 12px;display:flex;align-items:center;gap:12px;flex-direction:row-reverse;justify-content:space-between;background:linear-gradient(135deg,var(--accent),var(--accent-2));backdrop-filter:blur(10px) saturate(160%);border-bottom:1px solid var(--glass-border); color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.35);text-align:right}
-.miri-hgroup{display:flex;flex-direction:column;align-items:flex-end}
+.miri-header{position:relative;padding:12px 14px 10px;display:flex;align-items:center;gap:10px;flex-direction:row-reverse;justify-content:space-between;background:linear-gradient(135deg,var(--accent),var(--accent-2));backdrop-filter:blur(10px) saturate(160%);border-bottom:1px solid var(--glass-border); color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.35);text-align:right}
+.miri-hgroup{display:flex;flex-direction:column;align-items:flex-end;padding-left:12px;padding-right:12px}
 .miri-avatar{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--accent) 10%,var(--accent-2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
 .miri-title{font-weight:700;letter-spacing:.2px}
 .miri-sub{font-size:.85rem;color:var(--text-2);display:flex;align-items:center;gap:8px}
@@ -780,6 +1114,9 @@ canvas#miri-net{position:absolute;inset:0;width:100%;height:100%;filter:contrast
   .miri-wrap{left:12px;right:12px;width:auto}
   .miri-card{border-radius:16px}
 }
+
+/* Skin Overrides */
+<?php echo $this->get_skin_css($settings); ?>
 </style>
 
 <button class="miri-launcher" id="miri-launch" aria-label="פתח צ'אט">
