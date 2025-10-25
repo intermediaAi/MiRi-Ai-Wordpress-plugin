@@ -1,4 +1,4 @@
-# Miri Chat Widget Pro - גרסה 2.1.0 (מתוקנת ומשופרת)
+# Miri Chat Widget Pro - גרסה 2.1.0 
 
 ## 🎉 מה חדש בגרסה 2.1.0
 
