@@ -29,6 +29,7 @@ class Miri_Chat_Widget_Pro {
         add_action('wp_ajax_miri_test_webhook', array($this, 'handle_test_webhook'));
         add_action('wp_ajax_miri_reset_settings', array($this, 'handle_reset_settings'));
         add_action('wp_footer', array($this, 'inject_chat_widget'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
         add_action('init', array($this, 'load_textdomain'));
     }
     
@@ -42,13 +43,14 @@ class Miri_Chat_Widget_Pro {
     /**
      * Get default settings
      */
-    private function get_defaults() {
+    public function get_defaults() {
         return array(
             // Basic
             'enabled' => true,
             'webhook_url' => 'https://bot.intermedia.co.il/webhook/dc518a4b-4656-440b-90e4-3b583c90ef5c/chat',
-            
+
             // Appearance
+            'skin' => 'cosmic',
             'title' => 'שלום! אני מירי 🤖',
             'subtitle' => 'זמינה עכשיו',
             'welcome_msg_1' => 'היי! 👋',
@@ -123,11 +125,15 @@ class Miri_Chat_Widget_Pro {
         $sanitized['welcome_msg_2'] = wp_kses_post($input['welcome_msg_2']);
         $sanitized['placeholder'] = sanitize_text_field($input['placeholder']);
         $sanitized['button_text'] = sanitize_text_field($input['button_text']);
-        
+
+        $sanitized['skin'] = in_array($input['skin'] ?? '', array('cosmic', 'whatsapp', 'light', 'business'))
+            ? $input['skin']
+            : 'cosmic';
+
         $sanitized['color_primary'] = sanitize_hex_color($input['color_primary']);
         $sanitized['color_secondary'] = sanitize_hex_color($input['color_secondary']);
         $sanitized['color_bg'] = sanitize_hex_color($input['color_bg']);
-        
+
         $sanitized['button_position'] = in_array($input['button_position'], array('bottom-right', 'bottom-left', 'top-right', 'top-left')) 
             ? $input['button_position'] : 'bottom-right';
         $sanitized['button_size'] = absint($input['button_size']);
@@ -144,8 +150,50 @@ class Miri_Chat_Widget_Pro {
         $sanitized['sound_enabled'] = !empty($input['sound_enabled']);
         $sanitized['typing_indicator'] = !empty($input['typing_indicator']);
         $sanitized['max_history_messages'] = absint($input['max_history_messages']);
-        
+
         return $sanitized;
+    }
+
+    /**
+     * Enqueue frontend assets
+     */
+    public function enqueue_frontend_assets() {
+        if (is_admin()) {
+            return;
+        }
+
+        $settings = wp_parse_args(get_option($this->option_name, array()), $this->get_defaults());
+
+        if (!$this->should_display_widget($settings)) {
+            return;
+        }
+
+        wp_enqueue_script(
+            'miri-chat-widget',
+            plugins_url('miri-chat-widget-v2.1.0.js', __FILE__),
+            array(),
+            $this->version,
+            true
+        );
+
+        $config = array(
+            'webhook' => esc_url_raw($settings['webhook_url']),
+            'welcome1' => wp_kses_post($settings['welcome_msg_1']),
+            'welcome2' => wp_kses_post($settings['welcome_msg_2']),
+            'placeholder' => sanitize_text_field($settings['placeholder']),
+            'buttonText' => sanitize_text_field($settings['button_text']),
+            'title' => sanitize_text_field($settings['title']),
+            'subtitle' => sanitize_text_field($settings['subtitle']),
+            'typingIndicator' => !empty($settings['typing_indicator']),
+            'soundEnabled' => !empty($settings['sound_enabled']),
+            'maxHistoryMessages' => max(1, absint($settings['max_history_messages'])),
+        );
+
+        wp_add_inline_script(
+            'miri-chat-widget',
+            'window.miriChatConfig = ' . wp_json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';',
+            'before'
+        );
     }
     
     /**
@@ -271,13 +319,119 @@ class Miri_Chat_Widget_Pro {
      */
     public function render_settings_page() {
         $settings = wp_parse_args(get_option($this->option_name, array()), $this->get_defaults());
-        
+
         // Save notice
         if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
             echo '<div class="notice notice-success is-dismissible"><p>' . __('ההגדרות נשמרו בהצלחה!', 'miri-chat-pro') . '</p></div>';
         }
-        
+
         include(plugin_dir_path(__FILE__) . 'admin/settings-page.php');
+    }
+
+    /**
+     * Get custom CSS for selected skin
+     */
+    private function get_skin_css($settings) {
+        $skin = $settings['skin'];
+
+        switch ($skin) {
+            case 'whatsapp':
+                return "
+:root{
+  --primary:#075e54;
+  --primary-light:#128c7e;
+  --bg:#e5ddd5;
+  --msg-bot:#ffffff;
+  --msg-user:#dcf8c6;
+  --text:#000000;
+  --text-light:#667781;
+  --border:#d1d7db;
+}
+.miri-launcher{background:var(--primary-light)!important}
+.miri-wrap{font-family:system-ui,-apple-system,sans-serif}
+.miri-card{background:#e5ddd5!important;background-image:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDBoNDAwdjQwMEgweiIgZmlsbD0iI0U1RERENSIvPjwvZz48L3N2Zz4=')!important;backdrop-filter:none!important;opacity:1!important}
+.miri-header{background:var(--primary)!important;border-bottom:none!important;padding:10px 14px 8px!important;gap:10px!important}
+.miri-hgroup{padding-left:8px!important;padding-right:0!important}
+.miri-avatar{margin-left:4px!important}
+.miri-feed{background:#e5ddd5!important}
+.msg .bubble{box-shadow:0 1px 0.5px rgba(0,0,0,.13)!important}
+.msg.me .bubble{background:var(--msg-user)!important;color:#000!important}
+.msg:not(.me) .bubble{background:var(--msg-bot)!important;color:#000!important;border:none!important}
+canvas#miri-net,
+.miri-bubble{display:none!important}
+.miri-input{background:#f0f2f5!important;border-top:none!important}
+.miri-text{background:#ffffff!important;color:#000!important;border-color:#d1d7db!important}
+.miri-send{background:var(--primary-light)!important}
+";
+
+            case 'light':
+                return "
+:root{
+  --primary:#3b82f6;
+  --bg:#ffffff;
+  --bg-secondary:#f9fafb;
+  --msg-bot:#f3f4f6;
+  --msg-user:#3b82f6;
+  --text:#111827;
+  --text-light:#6b7280;
+  --border:#e5e7eb;
+}
+.miri-launcher{background:var(--primary)!important;border-radius:50%!important;box-shadow:0 4px 12px rgba(59,130,246,0.3)!important}
+.miri-card{background:rgba(255,255,255,0.98)!important;border:1px solid var(--border)!important;backdrop-filter:blur(20px)!important}
+.miri-header{background:#ffffff!important;border-bottom:1px solid var(--border)!important;color:var(--text)!important;text-shadow:none!important;padding:10px 14px 8px!important;gap:10px!important}
+.miri-hgroup{padding-left:8px!important;padding-right:0!important}
+.miri-avatar{margin-left:4px!important}
+.miri-title{color:var(--text)!important}
+.miri-sub{color:var(--text-light)!important}
+.miri-online{background:#10b981!important}
+.miri-feed{background:var(--bg-secondary)!important}
+.msg.me .bubble{background:var(--msg-user)!important;color:#ffffff!important;border:none!important}
+.msg:not(.me) .bubble{background:var(--msg-bot)!important;color:var(--text)!important;border:1px solid var(--border)!important}
+canvas#miri-net,
+.miri-bubble,
+.miri-shimmer{display:none!important}
+.miri-input{background:#ffffff!important;border-top:1px solid var(--border)!important}
+.miri-text{background:var(--bg-secondary)!important;color:var(--text)!important;border-color:var(--border)!important}
+.miri-text::placeholder{color:var(--text-light)!important}
+.miri-send{background:var(--primary)!important}
+.ts{color:var(--text-light)!important}
+";
+
+            case 'business':
+                return "
+:root{
+  --primary:#1e40af;
+  --primary-light:#3b82f6;
+  --bg:#f8fafc;
+  --msg-bot:#e0e7ff;
+  --msg-user:#3b82f6;
+  --text:#1e293b;
+  --text-light:#64748b;
+  --border:#cbd5e1;
+}
+.miri-launcher{background:linear-gradient(135deg,var(--primary),var(--primary-light))!important}
+.miri-card{background:rgba(255,255,255,0.98)!important;border:1px solid var(--border)!important;backdrop-filter:blur(20px)!important}
+.miri-header{background:var(--primary)!important;border-bottom:1px solid rgba(255,255,255,0.1)!important;padding:10px 14px 8px!important;gap:10px!important}
+.miri-hgroup{padding-left:8px!important;padding-right:0!important}
+.miri-avatar{margin-left:4px!important}
+.miri-feed{background:var(--bg)!important}
+.msg.me .bubble{background:var(--msg-user)!important;color:#ffffff!important;border:none!important}
+.msg:not(.me) .bubble{background:var(--msg-bot)!important;color:var(--text)!important;border:none!important}
+canvas#miri-net,
+.miri-bubble{display:none!important}
+.miri-input{background:#ffffff!important;border-top:1px solid var(--border)!important}
+.miri-text{background:var(--bg)!important;color:var(--text)!important;border-color:var(--border)!important}
+.miri-text::placeholder{color:var(--text-light)!important}
+.miri-send{background:var(--primary)!important}
+";
+
+            case 'cosmic':
+            default:
+                return "
+/* Cosmic skin - הטקסט צריך להיות לא צמוד */
+.miri-hgroup{padding-left:8px!important;padding-right:8px!important}
+";
+        }
     }
     
     /**
